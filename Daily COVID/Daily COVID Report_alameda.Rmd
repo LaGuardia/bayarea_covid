@@ -28,7 +28,7 @@ library(tidyquant)
 
 ## COVID update for Bay Area
 
-**Personal Note.**  The Last couple of days have been a great sign in terms of seeing less cases pop up. I think it is safe to say we hit our peak last week and now are finally on our way down!  About time.
+**Personal Note.**  I created this just for the cities you asked for.  It seems Alameda's county data had a blip and released a whole bunch of cases all on the first of Feb.  I'm curious if they are counting previously uncounted population based on a rule change.  Whatever the reason, on Feb 2, there was an adjustment period where they all had less total than the day before and didn't report for Feb 3rd.  Long story short, mixing county data is messy, but i believe Dublin and Pleasanton are also seeing a downward trend. 
 
 ```{r read_data, include=FALSE}
 city<-read_csv("/Users/d985286/california-coronavirus-data/latimes-place-totals.csv")
@@ -42,7 +42,7 @@ a1<-city %>% #filter(date < '2022-01-14') %>%
 ```
 ## Raw Counts for cities for last 7 days
 ```{r table1, echo=FALSE}
-   a1 %>% select(name,date,cases) %>% filter(name %in% c("Martinez","Pleasant Hill","Orinda","Walnut Creek","Concord","Richmond","Lafayette","San Ramon","94568: Dublin","94588: Pleasanton", "94566: Pleasanton"), date > (Sys.Date() - 8)) %>%
+   a1 %>% select(name,date,cases) %>% filter(name %in% c("San Ramon","94568: Dublin","94588: Pleasanton", "94566: Pleasanton"), date > (Sys.Date() - 8)) %>%
   mutate(dates = format(date, "%m/%d")) %>% select(-date) %>% 
    group_by(name) %>% spread(dates, cases) %>% rename(City=name) %>% 
   formattable(align=c("l","c","c","c","c","c","c","c","c"))
@@ -50,7 +50,7 @@ a1<-city %>% #filter(date < '2022-01-14') %>%
 ```
 ## Comparable rates per 10k population across cities for last week (averaged) 
 ```{r table2, echo=FALSE}
-   a1 %>% select(name,date,case_by_10k) %>% filter(name %in% c("Martinez","Pleasant Hill","Orinda","Walnut Creek","Concord","Richmond","Lafayette","San Ramon","94568: Dublin","94588: Pleasanton, 94566: Pleasanton"),date > (Sys.Date() - 8)) %>% 
+   a1 %>% select(name,date,case_by_10k) %>% filter(name %in% c("San Ramon","94568: Dublin","94588: Pleasanton", "94566: Pleasanton"),date > (Sys.Date() - 8)) %>% 
  summarize(caserate=round(mean(case_by_10k),2) ) %>% 
   group_by(name) %>% rename(City=name) %>%  formattable(list(align=c("l","r"),caserate=color_bar("lightblue")))
 
@@ -58,8 +58,8 @@ a1<-city %>% #filter(date < '2022-01-14') %>%
 
 ```{r graph, echo=FALSE,  message=FALSE, warning=FALSE}
 end <- as_date(Sys.Date())
-a1 %>% filter( id %in% c("Pleasant Hill","Martinez")) %>% ggplot(aes(date,cases)) + 
-        facet_wrap(~id,ncol=1)  +
+a1 %>% filter( name %in% c("San Ramon","94568: Dublin")) %>% ggplot(aes(date,cases)) + 
+        facet_wrap(~name,ncol=1)  +
         geom_ma(ma_fun = EMA, n = 7,show.legend = T,linetype = "solid") + 
         coord_x_date(xlim = c(end - weeks(85), end))  + 
         theme_tq() + xlab("") + ylab("Daily Cases") + labs(title = "COVID 19 Historical Trend",
@@ -69,7 +69,7 @@ a1 %>% filter( id %in% c("Pleasant Hill","Martinez")) %>% ggplot(aes(date,cases)
 
 ```{r graph2, echo=FALSE,  message=FALSE, warning=FALSE}
 end <- as_date(Sys.Date())
-a1 %>% filter( date > '2021-07-01',id %in% c("Pleasant Hill","Martinez","Concord","Richmond","Lafayette","San Ramon","Dublin")) %>%
+a1 %>% filter( date > '2021-07-01',name %in% c("San Ramon","94568: Dublin","94588: Pleasanton", "94566: Pleasanton")) %>%
   rename(City=name) %>% ggplot(aes(date,case_by_10k,col=City,group=City)) + 
         geom_ma(ma_fun = EMA, n = 7,show.legend = T,linetype = "solid") + 
         coord_x_date(xlim = c(end - weeks(12), end))  + 
